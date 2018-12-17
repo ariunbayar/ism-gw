@@ -1,0 +1,6 @@
+DB_MYSQL = {
+    'DATABASE': '',
+    'USER'    : '',
+    'PASSWORD': '',
+    'HOST'    : '',
+}
