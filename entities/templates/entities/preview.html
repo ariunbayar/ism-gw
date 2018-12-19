@@ -1,0 +1,60 @@
+<!doctype html>
+<head>
+<body>
+
+<table>
+<tbody>
+    <tr>
+        <th align="right">Model name</th>
+        <td>{{ sync_model.model_name }}</td>
+    </tr>
+    <tr>
+        <th align="right">Sync</th>
+        <td>
+            {% if sync_model.is_enabled %}
+            Syncronizing
+            <a href="{% url "sync-model-disable" sync_model.id %}">stop</a>
+            {% else %}
+            NO -
+            <a href="{% url "sync-model-enable" sync_model.id %}">start syncronizing</a>
+            {% endif %}
+        </td>
+    </tr>
+</tbody>
+</table>
+
+<h2>Fields</h2>
+
+{% if sync_model.is_enabled %}
+<p>You can't change "sync" attribute when Model syncronization is disabled</p>
+{% endif %}
+
+<table>
+    <thead>
+        <tr>
+            <th>Field Name</th>
+            <th>ISM field</th>
+            <th>Sync</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for col in sync_model.columns.all %}
+        <tr>
+            <td>{{ col.name }}</td>
+            <td>{{ col.ism_name }}</td>
+            <td>
+                {% if col.is_enabled %}
+                    sync -
+                    <a href="{% url "sync-model-column-disable" col.id %}">stop</a>
+                {% else %}
+                    <a href="{% url "sync-model-column-enable" col.id %}">start syncronizing</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+</body>
+</head>

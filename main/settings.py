@@ -13,6 +13,14 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 
 from .local_settings import DB_MYSQL
+from .local_settings import DEBUG, SECRET_KEY
+from .local_settings import (
+        DB_HOST,
+        DB_PORT,
+        DB_SERVER_NAME,
+        DB_USERNAME,
+        DB_PASSWORD,
+    )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,18 +29,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'jhi)dl(druo^a4eos_l6fa*4jdzfbasj2d&6l8lh0(1buw)q$y'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'entities.apps.EntitiesConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,7 +59,7 @@ ROOT_URLCONF = 'main.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['main/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -120,11 +123,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ulaanbaatar'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -133,3 +136,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+ADMINS = [
+        ('Ariunbayar', 'admin@example.com'),
+    ]
+
+
+DATETIME_FORMAT = 'Y-m-d H:i'
+DATE_FORMAT = 'Y-m-d'
+TIME_FORMAT = 'H:i'
+
+
+SESSION_COOKIE_NAME = "ism-gw"

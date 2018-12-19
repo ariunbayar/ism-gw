@@ -13,9 +13,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path
+import entities.views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('entity/list/', entities.views.list, name='entity-list'),
+    path('entity/preview/<int:id>/', entities.views.preview, name='entity-preview'),
+    path('entity/track/', entities.views.track_for_sync, name='entity-track'),
+    path('entity/enable/<int:id>/', entities.views.enable_sync_model, name='sync-model-enable'),
+    path('entity/disable/<int:id>/', entities.views.disable_sync_model, name='sync-model-disable'),
+    path('entity/enable-column/<int:id>/', entities.views.enable_sync_model_column, name='sync-model-column-enable'),
+    path('entity/disable-column/<int:id>/', entities.views.disable_sync_model_column, name='sync-model-column-disable'),
 ]

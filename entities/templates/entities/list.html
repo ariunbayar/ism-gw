@@ -1,0 +1,56 @@
+<!doctype html>
+<head>
+<body>
+
+<table>
+<thead>
+    <tr>
+        <th>Name</th>
+        <th>ISM table</th>
+        <th>Sync</th>
+    </tr>
+</thead>
+<tbody>
+    {% for sync_model in sync_models %}
+    <tr>
+        <td>
+            <a href="{% url "entity-preview" sync_model.id %}">{{ sync_model.model_name }}</a>
+        </td>
+        <td>
+            {{ sync_model.ism_name }}
+        </td>
+        <td>
+            {% if sync_model.is_enabled %}
+            sync
+            {% else %}
+            no
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+<h2>Track</h2>
+<form method="post" action="{% url "entity-track" %}">{% csrf_token %}
+    <table>
+    <tbody>
+        <tr>
+            <th align="right">Model name</th>
+            <td><input type="text" name="model_name"/></td>
+        </tr>
+        <tr>
+            <th align="right">ISM name</th>
+            <td><input type="text" name="ism_name"/></td>
+        </tr>
+        <tr>
+            <th></th>
+            <td><input type="submit" value="Track"/></td>
+        </tr>
+    </tbody>
+    </table>
+</form>
+
+
+</body>
+</head>
