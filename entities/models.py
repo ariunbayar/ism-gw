@@ -39,12 +39,12 @@ class IsmRelInvVioD(models.Model):
     class Meta:
         db_table = 'ISM_T_REL_INV_VIO_D'
 
-    change_id = models.BigIntegerField()
-    row_id = models.CharField(max_length=50)
+    change_id = models.BigIntegerField(db_index=True)
+    row_id = models.CharField(max_length=50, db_index=True)
 
-    f_rel_inq_idn = models.IntegerField()
-    f_rel_inv_idn = models.IntegerField()
-    f_inv_vio_srn = models.IntegerField()
+    f_rel_inq_idn = models.IntegerField(db_index=True)
+    f_rel_inv_idn = models.IntegerField(db_index=True)
+    f_inv_vio_srn = models.IntegerField(db_index=True)
     f_del_cde = models.CharField(null=True, max_length=3)
     f_edt_day = models.CharField(null=True, max_length=8)
     f_edt_dtm = models.DateTimeField(null=True)

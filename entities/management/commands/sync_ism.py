@@ -11,7 +11,7 @@ from entities.models import SyncStatus
 
 
 # NUM_ITEMS_PER_MODEL = 3
-NUM_ITEMS_PER_MODEL = 100
+NUM_ITEMS_PER_MODEL = 2000
 
 
 class Command(BaseCommand):
