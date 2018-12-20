@@ -63,6 +63,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'context_processors.main_context_processor',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -149,3 +150,13 @@ TIME_FORMAT = 'H:i'
 
 
 SESSION_COOKIE_NAME = "ism-gw"
+
+
+CACHES = {
+        'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'},
+        'dump': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(BASE_DIR, 'dump', 'django_cache'),
+            'TIMEOUT': None,
+        }
+    }

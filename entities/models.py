@@ -1,4 +1,5 @@
 from django.db import models
+from django.apps import apps
 
 
 class SyncModel(models.Model):
@@ -6,12 +7,31 @@ class SyncModel(models.Model):
     ism_name = models.CharField(max_length=255)
     is_enabled = models.BooleanField()
 
+    def get_model(self):
+        return apps.get_model('entities', self.model_name)
+
 
 class SyncModelColumn(models.Model):
     syncmodel = models.ForeignKey(SyncModel, on_delete=models.PROTECT, related_name='columns')
     name = models.CharField(max_length=255)
     ism_name = models.CharField(max_length=255)
     is_enabled = models.BooleanField()
+    is_pk = models.BooleanField()
+
+
+class SyncStatus(models.Model):
+
+    # fetch_status = models.ForeignKey('self', on_delete=models.PROTECT, related_name='columns')
+    sync_model = models.ForeignKey(SyncModel, on_delete=models.PROTECT, null=True)
+    duration_ms = models.IntegerField()
+    stopped_at = models.DateTimeField(auto_now_add=True)
+
+
+class GracefulErrors(models.Model):
+
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
 
 
 class IsmRelInvVioD(models.Model):
@@ -19,7 +39,7 @@ class IsmRelInvVioD(models.Model):
     class Meta:
         db_table = 'ISM_T_REL_INV_VIO_D'
 
-    change_id = models.IntegerField()
+    change_id = models.BigIntegerField()
     row_id = models.CharField(max_length=50)
 
     f_rel_inq_idn = models.IntegerField()
@@ -61,7 +81,7 @@ class IsmRelLetD(models.Model):
     class Meta:
         db_table = 'ISM_T_REL_LET_D'
 
-    change_id = models.IntegerField()
+    change_id = models.BigIntegerField()
     row_id = models.CharField(max_length=50)
 
     f_rel_inq_idn = models.IntegerField(null=True)
@@ -97,7 +117,7 @@ class IsmRelInvM(models.Model):
     class Meta:
         db_table = 'ISM_T_REL_INV_M'
 
-    change_id = models.IntegerField()
+    change_id = models.BigIntegerField()
     row_id = models.CharField(max_length=50)
 
     f_aln_idn = models.IntegerField(null=True)

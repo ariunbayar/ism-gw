@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<table>
+<thead>
+    <tr>
+        <th>Model</th>
+        <th>Duration</th>
+        <th>Finished</th>
+    </tr>
+</thead>
+<tbody>
+    {% for sync_status in sync_status_list %}
+    <tr>
+        <td>
+            {{ sync_status.sync_model|default_if_none:"-" }}
+        </td>
+        <td>
+            {{ sync_status.duration_ms }}ms
+        </td>
+        <td>
+            {{ sync_status.stopped_at }}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

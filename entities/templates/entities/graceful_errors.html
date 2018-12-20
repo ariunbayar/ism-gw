@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<table>
+<thead>
+    <tr>
+        <th>Description</th>
+        <th>Created at</th>
+    </tr>
+</thead>
+<tbody>
+    {% for error in errors %}
+    <tr>
+        <td>
+            {% if error.is_read %}
+                {{ error.message }}
+            {% else %}
+                <strong>{{ error.message }}</strong>
+            {% endif %}
+        </td>
+        <td>
+            {{ error.created_at }}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+{% if unread_ids %}
+    <form method="post" action="{% url "mark-errors-read" %}">{% csrf_token %}
+        <input type="hidden" name="ids" value="{{ unread_ids }}"/>
+        <input type="submit" value="Mark all messages as read"/>
+    </form>
+{% endif %}
+
+{% endblock %}

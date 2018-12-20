@@ -1,12 +1,15 @@
-<!doctype html>
-<head>
-<body>
+{% extends "layout.html" %}
+{% block content %}
 
 <table>
 <tbody>
     <tr>
         <th align="right">Model name</th>
         <td>{{ sync_model.model_name }}</td>
+    </tr>
+    <tr>
+        <th align="right">ISM Table</th>
+        <td>{{ sync_model.ism_name }}</td>
     </tr>
     <tr>
         <th align="right">Sync</th>
@@ -23,15 +26,18 @@
 </tbody>
 </table>
 
+
 <h2>Fields</h2>
 
 {% if sync_model.is_enabled %}
 <p>You can't change "sync" attribute when Model syncronization is disabled</p>
 {% endif %}
 
+
 <table>
     <thead>
         <tr>
+            <th></th>
             <th>Field Name</th>
             <th>ISM field</th>
             <th>Sync</th>
@@ -40,6 +46,7 @@
     <tbody>
         {% for col in sync_model.columns.all %}
         <tr>
+            <td>{% if col.is_pk %}[PK]{% endif %}</td>
             <td>{{ col.name }}</td>
             <td>{{ col.ism_name }}</td>
             <td>
@@ -56,5 +63,27 @@
 </table>
 
 
-</body>
-</head>
+<a href="{% url "entity-delete" sync_model.id %}" onclick="return confirm('Sure?')">Delete this entity</a>
+
+
+<h2>Preview of last 10 items</h2>
+<table>
+    <thead>
+        <tr>
+            {% for title in preview_titles %}
+            <th>{{ title }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for values in preview_values %}
+        <tr>
+            {% for value in values %}
+            <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
