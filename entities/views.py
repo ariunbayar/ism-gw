@@ -3,7 +3,7 @@ from collections import defaultdict
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from django.apps import apps
-from django.db import models, transaction
+from django.db import models
 
 from entities.models import SyncModel, SyncModelColumn
 from entities.models import SyncStatus
@@ -161,7 +161,7 @@ def disable_sync_model_column(request, id):
 def delete(request, id):
     sync_model = get_object_or_404(SyncModel, pk=id)
 
-    with transaction.atomic():
+    if sync_column.syncmodel.is_enabled == False:  # if not syncing
         sync_model.columns.all().delete()
         sync_model.syncstatus_set.all().delete()
         sync_model.delete()

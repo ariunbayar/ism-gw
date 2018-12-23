@@ -45,7 +45,7 @@ class connect_db:
 
         def _fix_value(value):
             if isinstance(value, datetime):
-                return timezone.make_aware(value)
+                return timezone.make_aware(value, is_dst=False)
             else:
                 return value
 

@@ -128,11 +128,15 @@ class Command(BaseCommand):
         if instance:
             return is_duplicate, is_created, is_updated
 
-        try:
-            pk_values = dict([(col.name, getattr(row, col.ism_name)) for col in columns if col.is_pk])
-            instance = Model.objects.get(**pk_values)
-            is_updated = True
-        except Model.DoesNotExist:
+        pk_values = dict([(col.name, getattr(row, col.ism_name)) for col in columns if col.is_pk])
+        if len(pk_values):
+            try:
+                instance = Model.objects.get(**pk_values)
+                is_updated = True
+            except Model.DoesNotExist:
+                is_created = True
+                instance = Model()
+        else:
             is_created = True
             instance = Model()
 
@@ -220,7 +224,7 @@ class Command(BaseCommand):
         fields = []
         for col in columns:
             if col.aggregation and '{0}' in col.aggregation:
-                fields.append(col.aggregation.format(col.ism_name))
+                fields.append(col.aggregation.format(col.ism_name) + ' as ' + col.ism_name)
             else:
                 fields.append(col.ism_name)
 
@@ -237,7 +241,6 @@ class Command(BaseCommand):
             }
 
         if last_change_id and last_row_id:
-            # format_args['additional_condition'] = 'AND ORA_ROWSCN >= :prowscn AND ROWID > :prowid'
             format_args['additional_condition'] = 'AND ((ORA_ROWSCN > :prowscn) OR (ORA_ROWSCN = :prowscn AND ROWID > :prowid))'
             params['prowscn'] = last_change_id
             params['prowid'] = last_row_id
