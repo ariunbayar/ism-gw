@@ -7,6 +7,8 @@
         <th>Name</th>
         <th>ISM table</th>
         <th>Sync</th>
+        <th>Last change id</th>
+        <th>Last Sync</th>
     </tr>
 </thead>
 <tbody>
@@ -24,6 +26,10 @@
             {% else %}
             no
             {% endif %}
+        </td>
+        <td> {{ last_change_id }} </td>
+        <td>
+            {{ sync_model.last_sync_at|timesince }}
         </td>
     </tr>
     {% endfor %}

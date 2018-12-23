@@ -25,6 +25,7 @@ urlpatterns = [
     path('entity/enable-column/<int:id>/', entities.views.enable_sync_model_column, name='sync-model-column-enable'),
     path('entity/disable-column/<int:id>/', entities.views.disable_sync_model_column, name='sync-model-column-disable'),
     path('entity/delete/<int:id>/', entities.views.delete, name='entity-delete'),
+    path('entity/aggregate/<int:id>/', entities.views.aggregate, name='entity-aggregate'),
 
     path('entity/sync-status/', entities.views.sync_status, name='entity-sync-status'),
 

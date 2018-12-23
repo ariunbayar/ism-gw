@@ -30,7 +30,9 @@
 <h2>Fields</h2>
 
 {% if sync_model.is_enabled %}
+
 <p>You can't change "sync" attribute when Model syncronization is disabled</p>
+
 {% endif %}
 
 
@@ -40,6 +42,7 @@
             <th></th>
             <th>Field Name</th>
             <th>ISM field</th>
+            <th>Aggregation</th>
             <th>Sync</th>
         </tr>
     </thead>
@@ -49,12 +52,18 @@
             <td>{% if col.is_pk %}[PK]{% endif %}</td>
             <td>{{ col.name }}</td>
             <td>{{ col.ism_name }}</td>
+            <td> {{ col.aggregation|default_if_none:"-" }} </td>
             <td>
                 {% if col.is_enabled %}
-                    sync -
-                    <a href="{% url "sync-model-column-disable" col.id %}">stop</a>
+                    sync
+                    {% if not sync_model.is_enabled %}
+                        -
+                        <a href="{% url "sync-model-column-disable" col.id %}">stop</a>
+                    {% endif %}
                 {% else %}
-                    <a href="{% url "sync-model-column-enable" col.id %}">start syncronizing</a>
+                    {% if not sync_model.is_enabled %}
+                        <a href="{% url "sync-model-column-enable" col.id %}">start syncronizing</a>
+                    {% endif %}
                 {% endif %}
             </td>
         </tr>
@@ -64,6 +73,71 @@
 
 
 <a href="{% url "entity-delete" sync_model.id %}" onclick="return confirm('Sure?')">Delete this entity</a>
+
+
+<h2>Aggregation</h2>
+
+{% if sync_model.is_enabled %}
+
+<p>You can't modify aggregation when "sync" is enabled </p>
+
+{% else %}
+
+<form method="post" action="{% url "entity-aggregate" sync_model.id %}">{% csrf_token %}
+    <table>
+        <tbody>
+            <tr>
+                <th>Field Name</th>
+                <td><input type="text" name="field_name"/></td>
+            </tr>
+            <tr>
+                <th>Aggregation SQL</th>
+                <td>
+                    <input type="text" name="aggregation"/>
+                    <div>Usage: UPPER({0})</div>
+                    <div>Empty value will clear aggregation</div>
+                </td>
+            </tr>
+            <tr>
+                <th></th>
+                <td><input type="submit" value="Save aggregation"/></td>
+            </tr>
+        </tbody>
+    </table>
+<form>
+
+{% endif %}
+
+
+<h2>Last 20 syncronization</h2>
+<table>
+<thead>
+    <tr>
+        <th> num_fetch_expected </th>
+        <th> num_fetched </th>
+        <th> num_duplicates </th>
+        <th> num_created </th>
+        <th> num_updated </th>
+        <th>Duration</th>
+        <th>Finished</th>
+    </tr>
+</thead>
+<tbody>
+    {% for sync_status in sync_status_list %}
+    <tr>
+        <td align="right"> {{ sync_status.num_fetch_expected }} </td>
+        <td align="right"> {{ sync_status.num_fetched }} </td>
+        <td align="right"> {{ sync_status.num_duplicates }} </td>
+        <td align="right"> {{ sync_status.num_created }} </td>
+        <td align="right"> {{ sync_status.num_updated }} </td>
+        <td align="right"> {{ sync_status.duration_ms }}ms </td>
+        <td>
+            {{ sync_status.stopped_at }}
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
 
 
 <h2>Preview of last 10 items</h2>

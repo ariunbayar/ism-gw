@@ -42,15 +42,20 @@ def preview(request, id):
 
     model = sync_model.get_model()
 
+    # Preview values
     preview_titles = ['change_id', 'row_id'] + [f.name for f in get_model_fields(model)]
     preview_values = []
-    for instance in model.objects.all()[:10]:
+    for instance in model.objects.all().order_by('-change_id', '-row_id')[:10]:
         preview_values.append([getattr(instance, t) for t in preview_titles])
+
+    # SyncStatus for this model
+    sync_status_list = sync_model.syncstatus_set.all().order_by('-stopped_at')[:20]
 
     context = {
             'sync_model': sync_model,
             'preview_titles': preview_titles,
             'preview_values': preview_values,
+            'sync_status_list': sync_status_list,
         }
     return render(request, 'entities/preview.html', context)
 
@@ -94,7 +99,7 @@ def track_for_sync(request):
     pk_constraints = _get_pk_constraints(ism_name)
     if len(pk_constraints) > 1:
         graceful_error = GracefulErrors()
-        graceful_error.message = "\nSingle primary key constraint required for %s (%s). Got: %s\n" % (model_name, ism_name, pk_constraints.keys())
+        graceful_error.message = "Single primary key constraint required for %s (%s). Got: %s" % (model_name, ism_name, pk_constraints.keys())
         graceful_error.save()
         return Http404()
     else:
@@ -190,3 +195,19 @@ def mark_errors_read(request):
         GracefulErrors.objects.filter(pk__in=ids).update(is_read=True)
 
     return redirect('graceful-errors')
+
+
+def aggregate(request, id):
+    sync_model = get_object_or_404(SyncModel, pk=id)
+    field_name = request.POST.get('field_name')
+    try:
+        sync_column = sync_model.columns.get(name=field_name)
+    except SyncModelColumn.DoesNotExist:
+        error = GracefulErrors()
+        error.message = "Can't find %s.%s" % (sync_model.model_name, field_name)
+        error.save()
+    else:
+        sync_column.aggregation = request.POST.get('aggregation') or None
+        sync_column.save()
+
+    return redirect('entity-preview', sync_model.id)

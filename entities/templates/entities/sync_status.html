@@ -5,6 +5,11 @@
 <thead>
     <tr>
         <th>Model</th>
+        <th> num_fetch_expected </th>
+        <th> num_fetched </th>
+        <th> num_duplicates </th>
+        <th> num_created </th>
+        <th> num_updated </th>
         <th>Duration</th>
         <th>Finished</th>
     </tr>
@@ -13,8 +18,17 @@
     {% for sync_status in sync_status_list %}
     <tr>
         <td>
-            {{ sync_status.sync_model|default_if_none:"-" }}
+            {% if sync_status.sync_model %}
+                {{ sync_status.sync_model.model_name }}
+            {% else %}
+                -
+            {% endif %}
         </td>
+        <td> {{ sync_status.num_fetch_expected }} </td>
+        <td> {{ sync_status.num_fetched }} </td>
+        <td> {{ sync_status.num_duplicates }} </td>
+        <td> {{ sync_status.num_created }} </td>
+        <td> {{ sync_status.num_updated }} </td>
         <td>
             {{ sync_status.duration_ms }}ms
         </td>
