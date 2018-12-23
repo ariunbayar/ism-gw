@@ -1,0 +1,104 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+body, input, select option{
+    font-family: "Fira Sans Extra Condensed";
+    font-size: 1.4rem;
+    font-weight: 100;
+    color: #333;
+}
+
+pre {
+    font-family: "Fira Mono";
+    font-size: 0.92rem;
+    color: #333;
+}
+
+input {
+    padding: .4rem 1rem;
+}
+
+th, h1 {
+    font-weight: 200;
+}
+
+
+table td, table th{
+    padding: 0rem 1rem;
+}
+
+table tr:hover{
+    background-color: rgba(0,0,0,.05);
+}
+
+.form-error {
+    color: red;
+}
+
+
+.wrapper {
+    margin: 4rem auto;
+    width: 1800px;
+    border: 1px solid rgba(0,0,0,.15);
+    box-shadow: 0 7px 25px rgba(0,0,0,.35);
+}
+
+.menu {
+    padding: 30px 30px 0 30px;
+}
+
+.menu a {
+    padding: .4rem 1rem;
+    text-transform: uppercase;
+}
+
+.main {
+    padding: 30px;
+}
+
+a {
+    text-decoration: none;
+    font-weight: 200;
+    color: #3F51B5;
+    transition: box-shadow 0.1s ease
+}
+a:hover {
+    box-shadow: inset 0 -1px #3F51B5;
+}
+
+.btn {
+    border: 1px solid #3f51b5;
+    border-radius: 4px;
+    padding: 0 1.4rem;
+    background-color: #3f51b5;
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+}
+
+.btn:hover {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, max-content));
+    grid-gap: 1rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.filters label.title{
+    font-weight: 200;
+    display: block;
+}
+
+.filters ul{
+    margin: 0;
+    list-style: none;
+    padding-left: 0;
+}
+
+.filters > .row {
+    grid-column: 1 / -1;
+}
