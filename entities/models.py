@@ -3340,6 +3340,8 @@ class IsmVsaRecM(models.Model):
     f_spm_rsn_cde = models.CharField(null=True, max_length=3)
     f_spm_yon_cde = models.CharField(null=True, max_length=3)
 
+
+"""
 class IsmToadPlanTable(models.Model):
 
     class Meta:
@@ -3384,4 +3386,4 @@ class IsmToadPlanTable(models.Model):
     f_temp_space = models.IntegerField(null=True)
     f_time = models.IntegerField(null=True)
     f_timestamp = models.DateTimeField(null=True)
-
+"""
