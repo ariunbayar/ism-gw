@@ -1,3 +1,4 @@
+import json
 import time
 from datetime import datetime
 
@@ -9,6 +10,8 @@ from django.utils import timezone
 from main.utils import connect_db
 from entities.models import SyncModel
 from entities.models import SyncStatus
+from entities.models import SyncStatus
+from ism.models import LongQuery
 
 
 # NUM_ITEMS_PER_MODEL = 3
@@ -22,9 +25,11 @@ class Command(BaseCommand):
         result = self._exec_query(*args, **kwargs)
         duration_ms = int((time.time() - started_at) * 1000)
         if duration_ms > 5000:
-            print('Long query: %sms' % (duration_ms))
-            print(args[0].strip())
-            import pprint; pprint.pprint(kwargs)
+            q = LongQuery()
+            q.query = args[0].strip()
+            q.args = json.dumps(kwargs)
+            q.duration_ms = duration_ms
+            q.save()
 
         return result
 
@@ -41,6 +46,8 @@ class Command(BaseCommand):
             self._exec_query = exec_query
 
             for sync_model in sync_models:
+
+                print("=== Model: %s (%s)" % (sync_model.model_name, sync_model.ism_name))
                 last_change_id = sync_model.last_change_id
 
                 has_more = True
@@ -56,7 +63,6 @@ class Command(BaseCommand):
                             print('Fetched: %s' % fetch_status['num_fetch_expected'])
 
                             sync_model.last_change_id = fetch_status['last_change_id']
-                            sync_model.last_sync_at = timezone.now()
                             sync_model.save()
 
                             sync_status = SyncStatus()
@@ -70,6 +76,8 @@ class Command(BaseCommand):
                             sync_status.save()
                         else:
                             has_more = False
+                sync_model.last_sync_at = timezone.now()
+                sync_model.save()
 
                 global_sync_status.num_fetch_expected  += fetch_status['num_fetch_expected']
                 global_sync_status.num_fetched         += fetch_status['num_fetched']
