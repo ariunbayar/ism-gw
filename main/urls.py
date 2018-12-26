@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 import entities.views
+import ism.views
 
 urlpatterns = [
     path('entity/list/', entities.views.all, name='entity-list'),
@@ -31,4 +32,6 @@ urlpatterns = [
 
     path('entity/graceful-errors/', entities.views.graceful_errors, name='graceful-errors'),
     path('entity/graceful-errors/mark-as-read/', entities.views.mark_errors_read, name='mark-errors-read'),
+
+    path('dashboard/', ism.views.dashboard, name='ism-dashboard'),
 ]

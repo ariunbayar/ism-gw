@@ -4,6 +4,7 @@
 <table>
 <thead>
     <tr>
+        <th>#</th>
         <th>Name</th>
         <th>ISM table</th>
         <th>Sync</th>
@@ -14,6 +15,9 @@
 <tbody>
     {% for sync_model in sync_models %}
     <tr>
+        <td>
+            {{ forloop.counter }}
+        </td>
         <td>
             <a href="{% url "entity-preview" sync_model.id %}">{{ sync_model.model_name }}</a>
         </td>

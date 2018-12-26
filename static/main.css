@@ -20,7 +20,7 @@ input {
     padding: .4rem 1rem;
 }
 
-th, h1 {
+th, h1, strong {
     font-weight: 200;
 }
 
@@ -101,4 +101,35 @@ a:hover {
 
 .filters > .row {
     grid-column: 1 / -1;
+}
+
+
+.status-items{
+    display: grid;
+    grid-gap: 24px 24px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.status-item{
+    display: inline-block;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.15);
+    vertical-align: top;
+    padding: 12px;
+}
+
+.label {
+    border-radius: 3px;
+    background-color: rgba(0,0,0,.2);
+    padding: .2em .4em;
+    font-weight: 400;
+    color: #fff;
+    font-size: .8em;
+}
+.label.green {
+    background-color: #43a047;
+}
+
+.label.red {
+    background-color: #c51162;
 }

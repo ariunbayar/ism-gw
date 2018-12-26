@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>ISM fetch health check</h1>
+
+<p>
+    <a href="{% url "ism-dashboard" %}?disabled=0">Hide disabled</a>
+    |
+    <a href="{% url "ism-dashboard" %}">Show all</a>
+</p>
+
+<div class="status-items">
+    {% for sync_model in sync_models %}
+    <div class="status-item">
+        <div>
+            <strong>
+                <a href="{% url "entity-preview" sync_model.id %}">{{ sync_model.model_name }}</a>
+                <br/>
+                ({{ sync_model.ism_name }})
+            </strong>
+        </div>
+        {% if sync_model.is_enabled %}
+            {% if sync_model.is_ok %}
+            <span class="label green">ok</span>
+            {% else %}
+            <span class="label red">check</span>
+            {% endif %}
+        {% else %}
+            <span class="label">disabled</span>
+        {% endif %}<br/>
+        {{ sync_model.last_change_id|default_if_none:"N/A" }}<br/>
+        {{ sync_model.last_sync_at|timesince }}
+
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

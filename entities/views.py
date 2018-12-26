@@ -13,7 +13,7 @@ from main.utils import connect_db
 
 def all(request):
 
-    sync_models = SyncModel.objects.all()
+    sync_models = SyncModel.objects.all().order_by('model_name')
 
     context = {
             'sync_models': sync_models,
@@ -97,7 +97,12 @@ def track_for_sync(request):
 
     # make sure there is only single primary key constraint
     pk_constraints = _get_pk_constraints(ism_name)
-    if len(pk_constraints) > 1:
+    if len(pk_constraints) == 0:
+        graceful_error = GracefulErrors()
+        graceful_error.message = "No primary key constraint defined  for %s (%s)" % (model_name, ism_name)
+        graceful_error.save()
+        pk_ism_fields = []
+    elif len(pk_constraints) > 1:
         graceful_error = GracefulErrors()
         graceful_error.message = "Single primary key constraint required for %s (%s). Got: %s" % (model_name, ism_name, pk_constraints.keys())
         graceful_error.save()
