@@ -1,5 +1,5 @@
-from django.db import models
 from django.apps import apps
+from django.db import models
 
 
 class SyncModel(models.Model):
@@ -24,7 +24,7 @@ class SyncModelColumn(models.Model):
 
 class SyncStatus(models.Model):
 
-    # fetch_status = models.ForeignKey('self', on_delete=models.PROTECT, related_name='columns')
+    # fetch_status = models.ForeignKey('self', on_delete=models.PROTECT)
     sync_model = models.ForeignKey(SyncModel, on_delete=models.PROTECT, null=True)
     duration_ms = models.IntegerField()
     stopped_at = models.DateTimeField(auto_now_add=True)
@@ -181,10 +181,10 @@ class IsmPspAlnM(models.Model):
 
     f_aln_idn = models.IntegerField(null=True)
     f_aln_psp_idn = models.IntegerField(db_index=True)
-    f_bir_day = models.CharField(null=True, max_length=8)
+    f_bir_day = models.CharField(null=True, max_length=8, db_index=True)
     f_fnm_gnr = models.CharField(null=True, max_length=50)
     f_fnm_nam = models.CharField(null=True, max_length=50)
-    f_gen_cde = models.CharField(null=True, max_length=3)
+    f_gen_cde = models.CharField(null=True, max_length=3, db_index=True)
     f_ntl_cde = models.CharField(null=True, max_length=3)
     f_psp_num = models.CharField(null=True, max_length=40)
     f_abb_nam = models.CharField(null=True, max_length=10)
@@ -3341,7 +3341,6 @@ class IsmVsaRecM(models.Model):
     f_spm_yon_cde = models.CharField(null=True, max_length=3)
 
 
-"""
 class IsmToadPlanTable(models.Model):
 
     class Meta:
@@ -3350,14 +3349,14 @@ class IsmToadPlanTable(models.Model):
     change_id = models.BigIntegerField(db_index=True)
     row_id = models.CharField(max_length=50, db_index=True)
 
-    f_access_predicates = models.CharField(null=True, max_length=4000)
+    f_access_predicates = models.TextField(null=True)  # max_length=4000
     f_bytes = models.IntegerField(null=True)
     f_cardinality = models.IntegerField(null=True)
     f_cost = models.IntegerField(null=True)
     f_cpu_cost = models.IntegerField(null=True)
     f_depth = models.IntegerField(null=True)
     f_distribution = models.CharField(null=True, max_length=30)
-    f_filter_predicates = models.CharField(null=True, max_length=4000)
+    f_filter_predicates = models.TextField(null=True)  # max_length=4000
     f_id = models.IntegerField(null=True)
     f_io_cost = models.IntegerField(null=True)
     f_object_alias = models.CharField(null=True, max_length=65)
@@ -3378,12 +3377,11 @@ class IsmToadPlanTable(models.Model):
     f_partition_stop = models.CharField(null=True, max_length=255)
     f_plan_id = models.IntegerField(null=True)
     f_position = models.IntegerField(null=True)
-    f_projection = models.CharField(null=True, max_length=4000)
+    f_projection = models.TextField(null=True)  # max_length=4000
     f_qblock_name = models.CharField(null=True, max_length=30)
-    f_remarks = models.CharField(null=True, max_length=4000)
+    f_remarks = models.TextField(null=True)  # max_length=4000
     f_search_columns = models.IntegerField(null=True)
     f_statement_id = models.CharField(null=True, max_length=30)
     f_temp_space = models.IntegerField(null=True)
     f_time = models.IntegerField(null=True)
     f_timestamp = models.DateTimeField(null=True)
-"""
