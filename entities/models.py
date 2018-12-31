@@ -7,6 +7,7 @@ class SyncModel(models.Model):
     ism_name = models.CharField(max_length=255)
     is_enabled = models.BooleanField()
     last_change_id = models.BigIntegerField(null=True)
+    last_row_id = models.CharField(max_length=50, null=True)
     last_sync_at = models.DateTimeField(null=True)
 
     def get_model(self):
