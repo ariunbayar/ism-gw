@@ -49,11 +49,8 @@ class connect_db:
             else:
                 return value
 
-        results = []
         for row in curs.fetchall():
-            results.append(row_builder(*[_fix_value(v) for v in row]))
-
-        return results
+            yield row_builder(*[_fix_value(v) for v in row])
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.connection.close()
