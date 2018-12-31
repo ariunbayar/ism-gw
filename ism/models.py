@@ -25,3 +25,4 @@ class LongQuery(models.Model):
     query = models.TextField()
     args = models.TextField()
     duration_ms = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
