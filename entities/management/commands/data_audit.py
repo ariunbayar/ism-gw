@@ -1,16 +1,18 @@
 import time
+import sys
 
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.db.models.expressions import RawSQL
+from django.utils import timezone
 
 from main.utils import connect_db
 from entities.models import SyncModel
 from entities.models import GracefulErrors
+from ism.models import LongQuery
 
 
-# NUM_ITEMS_PER_MODEL = 3
-NUM_ITEMS_PER_MODEL = 2000
+NUM_ITEMS_PER_MODEL = 100000
 
 
 class Command(BaseCommand):
@@ -20,9 +22,11 @@ class Command(BaseCommand):
         result = self._exec_query(*args, **kwargs)
         duration_ms = int((time.time() - started_at) * 1000)
         if duration_ms > 5000:
-            print('Long query: %sms' % (duration_ms))
-            print(args[0].strip())
-            import pprint; pprint.pprint(kwargs)
+            q = LongQuery()
+            q.query = args[0].strip()
+            q.args = json.dumps(kwargs)
+            q.duration_ms = duration_ms
+            q.save()
 
         return result
 
@@ -31,6 +35,7 @@ class Command(BaseCommand):
         global_started_at = time.time()
 
         sync_models = SyncModel.objects.filter(is_enabled=True)
+        sync_models = sync_models.filter(ism_name='T_PSP_ALN_M')
 
         with connect_db() as exec_query:
             self._exec_query = exec_query
@@ -44,33 +49,50 @@ class Command(BaseCommand):
                 num_extra = 0
                 has_more = True
                 last_change_id = None
-                # last_change_id = 8408044588717
                 last_row_id = None
+                # last_change_id = 8408044588717
                 # last_row_id = 'AAAnoRAA4AAJGdDAAA'
+
                 while has_more:
-                    rows = self.fetch_greater_than_last(sync_model, columns, NUM_ITEMS_PER_MODEL, last_change_id, last_row_id)
-                    if rows:
-                        num_compared += len(rows)
-                        num_diff_cur, num_missing_cur = self.compare(sync_model, columns, rows)
-                        num_diff += num_diff_cur
-                        num_missing += num_missing_cur
-                        has_more = len(rows) >= NUM_ITEMS_PER_MODEL
-                        last_change_id = rows[-1].ORA_ROWSCN
-                        last_row_id = rows[-1].ROWID
-                    else:
-                        break
-                    print("... num_compared %s" % num_compared)
+                    print('fetching since (%s, %s)' % (last_change_id, last_row_id))
+                    sys.stdout.flush()
+                    rows_iter = self.fetch_greater_than_last(sync_model, columns, NUM_ITEMS_PER_MODEL, last_change_id, last_row_id)
+                    print('comparing')
+                    sys.stdout.flush()
+                    num_compared_cur, num_diff_cur, num_missing_cur, last_change_id, last_row_id = self.compare(sync_model, columns, rows_iter)
+                    num_compared += num_compared_cur
+                    num_diff += num_diff_cur
+                    num_missing += num_missing_cur
+                    has_more = num_compared_cur >= NUM_ITEMS_PER_MODEL
+                    print("... num_compared {0:,g}".format(num_compared_cur))
+                    print("... num_diff {0:,g}".format(num_diff_cur))
+                    print("... num_missing {0:,g}".format(num_missing_cur))
+                    sys.stdout.flush()
+
                 num_extra = sync_model.get_model().objects.all().count() - (num_compared - num_missing)
                 print("=== num_compared %s" % num_compared)
                 print("=== num_diff     %s" % num_diff)
                 print("=== num_missing  %s" % num_missing)
                 print("=== num_extra    %s" % num_extra)
                 print()
+                sync_model.audited_at = timezone.now()
+                sync_model.audit_result = (
+                    "num_compared {0}\n"
+                    "num_diff     {1}\n"
+                    "num_missing  {2}\n"
+                    "num_extra    {3}\n"
+                ).format(
+                    num_compared,
+                    num_diff,
+                    num_missing,
+                    num_extra,
+                )
+                sync_model.save()
 
         duration_ms = int(1000 * (time.time() - global_started_at))
         print("Duration {0:,g}".format(duration_ms))
 
-    def compare(self, sync_model, columns, rows):
+    def compare(self, sync_model, columns, rows_iter):
 
         def _is_different(row, item):
             return any([v != item[i] for i, v in enumerate(row)])
@@ -80,7 +102,10 @@ class Command(BaseCommand):
 
         num_diff = 0
         num_missing = 0
-        for row in rows:
+        num_compared = 0
+        last_change_id = None
+        last_row_id = None
+        for row in rows_iter:
             qs = Model.objects.filter(change_id=row[0], row_id=row[1])
             items = list(qs.values_list(*fields))
             num_items = len(items)
@@ -94,80 +119,12 @@ class Command(BaseCommand):
             else:
                 if _is_different(row[2:], items[0]):
                     num_diff += 1
-        return num_diff, num_missing
+            num_compared += 1
+            last_change_id = row[0]
+            last_row_id = row[1]
 
+        return num_compared, num_diff, num_missing, last_change_id, last_row_id
 
-
-        min_change_id, min_row_id, *values = rows[0]
-        max_change_id, max_row_id, *values = rows[-1]
-
-        qs = sync_model.get_model().objects.filter(row_id__in=[row[1] for row in rows])
-        items = qs.values_list('change_id', 'row_id', *fields)[:len(rows)]
-
-        rows = sorted(rows, key=lambda v: v[1])
-        items = sorted(items, key=lambda v: v[1])
-
-
-        iter_rows = iter(rows)
-        iter_items = iter(items)
-
-
-
-        def _get_next_row():
-            try:
-                row = next(iter_rows)
-            except StopIteration:
-                return None, True
-            else:
-                return row, False
-
-        def _get_next_item():
-            try:
-                item = next(iter_items)
-            except StopIteration:
-                return None, True
-            else:
-                return item, False
-
-
-        row, is_end_of_rows = _get_next_row()
-        item, is_end_of_items = _get_next_item()
-
-
-
-        while True:
-            # catchup and compare algorithm by admin@example.com 2018-12-21
-            if item and row:
-                if item[0] == row[0]:
-                    if item[1] == row[1]:
-                        if _is_different(row[2:], item[2:]):
-                            num_diff += 1
-                        else:
-                            pass
-                        row, is_end_of_rows = _get_next_row()
-                        item, is_end_of_items = _get_next_item()
-                    elif item[1] > row[1]:
-                        row, is_end_of_rows = _get_next_row()
-                        num_missing += 1
-                    elif item[1] < row[1]:
-                        item, is_end_of_items = _get_next_item()
-                        num_extra += 1
-                elif item[0] > row[0]:
-                    row, is_end_of_rows = _get_next_row()
-                    num_missing += 1
-                elif item[0] < row[0]:
-                    item, is_end_of_items = _get_next_item()
-                    num_extra += 1
-            elif is_end_of_rows and is_end_of_items:
-                break
-            elif is_end_of_rows:
-                item, is_end_of_items = _get_next_item()
-                num_extra += 1
-            elif is_end_of_items:
-                row, is_end_of_rows = _get_next_row()
-                num_missing += 1
-
-        return num_diff, num_missing, num_extra
 
     def fetch_greater_than_last(self, sync_model, columns, num_rows, last_change_id=None, last_row_id=None):
 
@@ -183,8 +140,16 @@ class Command(BaseCommand):
                 ) WHERE ROWNUM <= :prownummax
             """
 
+
+        fields = []
+        for col in columns:
+            if col.aggregation and '{0}' in col.aggregation:
+                fields.append(col.aggregation.format(col.ism_name) + ' as ' + col.ism_name)
+            else:
+                fields.append(col.ism_name)
+
         format_args = {
-                'fields': ', '.join([col.ism_name for col in columns]),
+                'fields': ', '.join(fields),
                 'table': sync_model.ism_name,
                 'condition': '',
             }

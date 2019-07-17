@@ -36,6 +36,9 @@ class SyncStatus(models.Model):
     num_created         = models.IntegerField(default=0)
     num_updated         = models.IntegerField(default=0)
 
+    audited_at = models.DateTimeField(null=True)
+    audit_result = models.TextField(null=True)
+
 
 class GracefulErrors(models.Model):
 
